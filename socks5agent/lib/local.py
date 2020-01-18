@@ -27,34 +27,41 @@ class LocalSocket(object):
     def recv_with_head(self):
         buf = self.sock.recv(BUFFER_SIZE)
         # print('recv' + str(buf))
-        if not len(buf):  # 被close的时候会收到 b'',单独处理
-            return buf
 
-        self.buffer = self.buffer + buf
-        data = bytes()
-        for i in range(2):
-            if len(self.buffer) >= 2:
-                length = struct.unpack(">H", self.buffer[:2])[0]
-                if len(self.buffer) >= length + 2:
-                    buf = self.buffer[2:length + 2]
-                    if cipher.cipher:
+        if not cipher.cipher:
+            return buf
+        else:
+            if not len(buf):  # 被close的时候会收到 b'',单独处理
+                return buf
+
+            self.buffer = self.buffer + buf
+            data = bytes()
+            for i in range(2):
+                if len(self.buffer) >= 2:
+                    length = struct.unpack(">H", self.buffer[:2])[0]
+                    if len(self.buffer) >= length + 2:
+                        buf = self.buffer[2:length + 2]
+                        # if cipher.cipher:
                         buf = cipher.cipher.decrypt(buf)
-                    self.buffer = self.buffer[length + 2:]
-                    data += buf  # 这里可能返回 b''
+                        self.buffer = self.buffer[length + 2:]
+                        data += buf  # 这里可能返回 b''
+                    elif i == 0:
+                        # 数据未到
+                        data = None
+                        break
                 elif i == 0:
                     # 数据未到
                     data = None
                     break
-            elif i == 0:
-                # 数据未到
-                data = None
-                break
-        return data
+            return data
 
     def sendall_with_head(self, data):
         # print('send' + str(data))
-        if cipher.cipher:
+        if not cipher.cipher:
+            self.sock.sendall(data)
+        else:
+            # if cipher.cipher:
             data = cipher.cipher.encrypt(data)
-        length = len(data)
-        data = struct.pack(">H", length) + data
-        self.sock.sendall(data)
+            length = len(data)
+            data = struct.pack(">H", length) + data
+            self.sock.sendall(data)
