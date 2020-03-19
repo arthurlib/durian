@@ -49,7 +49,7 @@ class Task(object):
             # 放入队列
             self.sockets.add(local_sock)
             # 监听可读状态
-            self.poll.register(local_sock, selectors.EVENT_READ)
+            # self.poll.register(local_sock, selectors.EVENT_READ)
 
             self.conn_remote(local_sock)
         except Exception as e:
@@ -70,7 +70,7 @@ class Task(object):
         # 监听可写
         self.poll.register(remote, selectors.EVENT_WRITE)
         # 取消可读注册
-        self.poll.unregister(sock)
+        # self.poll.unregister(sock)
         # 绑定关系
         self.socket_map[remote] = sock
 
