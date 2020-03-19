@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 
@@ -8,7 +9,13 @@ from proxy.socks5agent.lib import cipher
 import proxy.socks5agent.server.server_selectors as server
 
 if __name__ == '__main__':
-    key = 'EkJSKinK3QzQe_MIMmRbGoI4IrJNg-uUhqLEiOGt-LN1wOJalcO8WGt0VG0On6_7f3kFnCysM0fx7pGbh12hsBm1JD9m3G_mq2GEd_X0zvkQADRZeAftScag71fyx9iqAtbSjxNLFjf3uGipbj4bUdOLpS5EriUdo2cR1b3MciEmt9HP9mp9Xgq5BMIxPew6Rl9WOTV-Y3BgU-kfjsg2J52ZcTAtHJi7pkp2FfqN3w2FGOggQXyxwSOWOxQDkMsJnjzJTrTlxWn_gJq2QyukqFxV49fbL0-Mc4G_KAGXHup6YuDkTGXN5wtQRbqS1L5sihfaQP4P2Ynwk95I_Qan_A=='
-    cipher.set_cipher('caesar', key)
-    
-    server.listen(7000)
+    config = {}
+    with open(os.path.join(base_path, "config.json"), "r") as f:
+        config = json.loads(f.read())
+
+    if config['key']:
+        cipher.set_cipher('caesar', config['key'])
+
+    print("starting on port: " + str(config['server']['port']))
+    server.listen(config['server']['port'])
+
