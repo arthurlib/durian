@@ -28,7 +28,7 @@ class Task(object):
 
     def cache_set(self, sock, data):
         if self.cache.get(self.socket_map[sock], None):
-            self.cache[self.socket_map[sock]] = self.cache[self.socket_map[sock]] + data
+            self.cache[self.socket_map[sock]] += data
         else:
             self.cache[self.socket_map[sock]] = bytes(data)
 
@@ -143,21 +143,22 @@ class Task(object):
 
                 if buf[1] == 0x00:
                     # 不验证
-                    if self.cache.get(self.socket_map[sock], None):
-                        self.cache[self.socket_map[sock]] = b''.join([self.cache[self.socket_map[sock]], buf])
-                    else:
-                        self.cache[self.socket_map[sock]] = bytes(buf)
+                    self.cache_set(sock, buf)
+                    # if self.cache.get(self.socket_map[sock], None):
+                    #     self.cache[self.socket_map[sock]] = b''.join([self.cache[self.socket_map[sock]], buf])
+                    # else:
+                    #     self.cache[self.socket_map[sock]] = bytes(buf)
 
                     # 将被绑定的sock设置为可读可写
                     self.poll.modify(self.socket_map[sock], selectors.EVENT_READ | selectors.EVENT_WRITE)
                     sock.socks5_protocol_status = SOCKS5_CONFIRM
                 elif buf[1] == 0x02:
                     # 要验证
-                    data = bytearray((0x05, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02))
+                    data = bytes((0x05, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02))
                     if self.cache.get(sock, None):
-                        self.cache[sock].append(data)
+                        self.cache[sock] += data
                     else:
-                        self.cache[sock] = [data]
+                        self.cache[sock] = data
                     # 将当前的sock设置为监听可写
                     self.poll.modify(sock, selectors.EVENT_WRITE)
                     sock.socks5_protocol_status = SOCKS5_AUTH
@@ -176,11 +177,12 @@ class Task(object):
                 if not check_login:
                     # print("login success")
                     # 本地验证结束，返回不验证
-                    buf = bytearray((0x05, 0x00))
-                    if self.cache.get(self.socket_map[sock], None):
-                        self.cache[self.socket_map[sock]].append(buf)
-                    else:
-                        self.cache[self.socket_map[sock]] = [buf]
+                    buf = bytes((0x05, 0x00))
+                    self.cache_set(sock, buf)
+                    # if self.cache.get(self.socket_map[sock], None):
+                    #     self.cache[self.socket_map[sock]].append(buf)
+                    # else:
+                    #     self.cache[self.socket_map[sock]] = buf
                     # 将被绑定的sock设置为可读可写
                     self.poll.modify(self.socket_map[sock], selectors.EVENT_READ | selectors.EVENT_WRITE)
                     sock.socks5_protocol_status = SOCKS5_CONFIRM
