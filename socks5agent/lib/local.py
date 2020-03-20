@@ -36,7 +36,7 @@ class LocalSocket(object):
 
             self.buffer = self.buffer + buf
             data = bytes()
-            for i in range(2):
+            while True:
                 if len(self.buffer) >= 2:
                     length = struct.unpack(">H", self.buffer[:2])[0]
                     if len(self.buffer) >= length + 2:
@@ -45,14 +45,23 @@ class LocalSocket(object):
                         buf = cipher.cipher.decrypt(buf)
                         self.buffer = self.buffer[length + 2:]
                         data += buf  # 这里可能返回 b''
-                    elif i == 0:
-                        # 数据未到
-                        data = None
+                    else:
+                        # 完整数据未到
+                        if not data:
+                            data = None
                         break
-                elif i == 0:
-                    # 数据未到
-                    data = None
+                else:
+                    # 完整数据未到
+                    if not data:
+                        data = None
                     break
+
+            # if data:
+            #     print(self.buffer)
+            #     if len(self.buffer) >= 2:
+            #         length = struct.unpack(">H", self.buffer[:2])[0]
+            #         print(length)
+            #         print(len(self.buffer))
             return data
 
     def sendall_with_head(self, data):
