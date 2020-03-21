@@ -13,7 +13,7 @@ if __name__ == '__main__':
     with open(os.path.join(base_path, "config.json"), "r") as f:
         config = json.loads(f.read())
 
-    if config['key']:
+    if config.get('key'):
         cipher.set_cipher('caesar', config['key'])
 
     print("starting on port: " + str(config['server']['port']))

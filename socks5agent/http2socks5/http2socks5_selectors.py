@@ -160,7 +160,7 @@ class Task(object):
     def socks5_write_handler(self, sock):
         if sock.socks5_protocol_status == SOCKS5_CONN:
             try:
-                data = bytearray((0x05, 0x01, 0x00))
+                data = bytes((0x05, 0x01, 0x00))
                 sock.sendall(data)
                 # print("send " + str(data))
                 sock.socks5_protocol_status = SOCKS5_AUTH
@@ -195,7 +195,7 @@ class Task(object):
                 host_len = struct.pack('B', len(host))
                 port = struct.pack('>H', port)
 
-                data = bytearray((0x05, 0x01, 0x00, 0x03)) + host_len + host + port
+                data = bytes((0x05, 0x01, 0x00, 0x03)) + host_len + host + port
                 sock.sendall(data)
                 # print("send " + str(data))
 

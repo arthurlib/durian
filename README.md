@@ -39,16 +39,34 @@ python3 lib/ciphers/caesar_cipher.py
   "client": {
     "server_host": "111.111.111.111",
     "server_port": 8090,
-    "local_socks5_port": 7002,
-    "local_http_port": 7003
+    "port": 7002
   }
 }
 ```
 * key: 与服务端key一致
 * client.server_host: 服务端ip
 * client.server_port: 服务端监听端口
-* client.local_socks5_port: 本地socks5代理监听端口
-* client.local_http_port: 本地http代理监听端口,若为空或不存在，则不启动
+* client.port: 本地socks5代理监听端口
 
+http监听(http转socks5)
 
-另： http2socks5.py 该文件可以单独运行
+> 放在http2socks5目录下，http配置设置后会同时启动socks5和http监听,  
+不设置则不启动http监听.
+
+```json
+{
+  "http": {
+    "socks5_host": "127.0.0.1",
+    "socks5_port": 7002,
+    "port": 7003
+  }
+}
+```
+* http.socks5_host: socks5代理的ip
+* http.socks5_port: socks5代理监听端口
+* http.port: 本地http代理监听端口
+
+http2socks5目录下两个文件：
+* http2socks5_selectors： 默认代码中使用的，使用selectors完成
+* http2socks5_tornado： 使用tornado编写，单独启动使用。（配置信息修改代码）
+

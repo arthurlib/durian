@@ -19,8 +19,8 @@ class Task(object):
         # 用户认证
         self.username = username
         self.password = password
-        # self.username = bytearray((0x02, 0x02))
-        # self.password = bytearray((0x02, 0x02))
+        # self.username = bytes((0x02, 0x02))
+        # self.password = bytes((0x02, 0x02))
 
     def cache_set(self, sock, data):
         if self.cache.get(self.socket_map[sock], None):
@@ -111,10 +111,10 @@ class Task(object):
                 # 判断是否要加密
                 if self.password:
                     # 要认证
-                    sock.sendall_with_head(bytearray((0x05, 0x02)))
+                    sock.sendall_with_head(bytes((0x05, 0x02)))
                     sock.socks5_protocol_status = SOCKS5_AUTH
                 else:
-                    sock.sendall_with_head(bytearray((0x05, 0x00)))
+                    sock.sendall_with_head(bytes((0x05, 0x00)))
                     sock.socks5_protocol_status = SOCKS5_CONFIRM
             except Exception as e:
                 print(e)
@@ -139,11 +139,11 @@ class Task(object):
                 passwd = buf[u_end + 1: u_end + 1 + buf[u_end]]
                 if self.username == username and self.password == passwd:
                     # 登录成功
-                    sock.sendall_with_head(bytearray((0x05, 0x00)))
+                    sock.sendall_with_head(bytes((0x05, 0x00)))
                     sock.socks5_protocol_status = SOCKS5_CONFIRM
                 else:
                     # 登录失败
-                    sock.sendall_with_head(bytearray((0x05, 0x01)))
+                    sock.sendall_with_head(bytes((0x05, 0x01)))
 
                     sock.close()
                     self.sockets.remove(sock)
@@ -244,7 +244,7 @@ class Task(object):
                 # 绑定关系
                 self.socket_map[remote] = sock
 
-                sock.sendall_with_head(bytearray((0x05, 0x00, 0x00, 0x01, 0x00, 0x00,
+                sock.sendall_with_head(bytes((0x05, 0x00, 0x00, 0x01, 0x00, 0x00,
                                                   0x00, 0x00, 0x00, 0x00)))
                 sock.socks5_protocol_status = SOCKS5_DONE
             except Exception as e:
