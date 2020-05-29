@@ -1,7 +1,6 @@
-import socket
-
 import tornado.ioloop
 from tornado.iostream import IOStream
+from tornado.tcpclient import TCPClient
 from tornado.tcpserver import TCPServer
 from tornado.gen import multi
 from proxy.lib.local import PorxyStream
@@ -11,19 +10,18 @@ from proxy.lib.netutil import read_and_send
 
 
 class HttpListen(TCPServer):
-    def __init__(self, *args, **kwargs):
-        address = kwargs.get('address', None)
-        kwargs.pop('address')
-        super(HttpListen, self).__init__(*args, **kwargs)
+    def __init__(self, address, *args, **kwargs):
         self.remote_addr = address
+
+        super(HttpListen, self).__init__(*args, **kwargs)
 
     async def handle_stream(self, stream, address):
         try:
-            # 连接远程
-            remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            remote_stream = IOStream(remote_socket)
             try:
-                await remote_stream.connect(self.remote_addr)
+                # 连接远程
+                tcp_client = TCPClient()
+                remote_stream = await tcp_client.connect(self.remote_addr[0], self.remote_addr[1])
+                remote_stream = PorxyStream(remote_stream)
             except Exception as e:
                 logger.debug('remote connect error')
                 stream.close()
@@ -34,7 +32,6 @@ class HttpListen(TCPServer):
             await self.exchange_agreement(stream, remote_stream)
 
             # 开始交换数据
-            remote_stream = PorxyStream(remote_stream)
             await multi([read_and_send(stream, remote_stream), read_and_send(remote_stream, stream)])
         except tornado.iostream.StreamClosedError:
             pass

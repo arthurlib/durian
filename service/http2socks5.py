@@ -1,9 +1,9 @@
-import socket
 import struct
 
 import tornado.ioloop
 import tornado.web
 import tornado.iostream
+from tornado.tcpclient import TCPClient
 from tornado.tcpserver import TCPServer
 
 from tornado.gen import multi
@@ -14,11 +14,10 @@ from proxy.lib.netutil import read_and_send
 
 
 class HttpListen(TCPServer):
-    def __init__(self, *args, **kwargs):
-        address = kwargs.get('address', None)
-        kwargs.pop('address')
-        super(HttpListen, self).__init__(*args, **kwargs)
+    def __init__(self, address, *args, **kwargs):
         self.remote_addr = address
+
+        super(HttpListen, self).__init__(*args, **kwargs)
 
     async def handle_stream(self, stream, address):
         try:
@@ -52,14 +51,15 @@ class HttpListen(TCPServer):
         host_len = struct.pack('B', len(host))
 
         # 创建iostream
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        remote_stream = tornado.iostream.IOStream(s)
+        remote_stream = None
         try:
-            await remote_stream.connect(self.remote_addr)
+            tcp_client = TCPClient()
+            remote_stream = await tcp_client.connect(self.remote_addr[0], self.remote_addr[1])
         except Exception as e:
             logger.debug('remote connect error')
             local_stream.close()
-            remote_stream.close()
+            if remote_stream:
+                remote_stream.close()
             return None
 
         # handle socks5

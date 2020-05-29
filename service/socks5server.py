@@ -3,6 +3,7 @@ import socket
 import tornado.ioloop
 import tornado.web
 from tornado.iostream import IOStream
+from tornado.tcpclient import TCPClient
 from tornado.tcpserver import TCPServer
 
 from tornado.gen import multi
@@ -12,17 +13,15 @@ from proxy.lib.log import logger
 from proxy.lib.model import Address
 from proxy.lib.netutil import read_and_send
 
-socks5_agent_remote_addr = Address("127.0.0.1", 8090)
-
 
 class HttpListen(TCPServer):
     async def handle_stream(self, stream, address):
+        local_stream = PorxyStream(stream)
         try:
             # 交换协议
-            remote_stream = await self.exchange_agreement(stream)
+            remote_stream = await self.exchange_agreement(local_stream)
             if remote_stream:
                 # 交换数据
-                local_stream = PorxyStream(stream)
                 await multi([read_and_send(local_stream, remote_stream), read_and_send(remote_stream, local_stream)])
         except tornado.iostream.StreamClosedError:
             pass
@@ -90,6 +89,7 @@ class HttpListen(TCPServer):
             # domain
             dst_ip = buf[5:-2].decode()
             dst_address = Address(ip=dst_ip, port=dst_port)
+            dst_family = 0
         elif buf[3] == 0x04:
             # ipv6
             dst_ip = socket.inet_ntop(socket.AF_INET6, buf[4:4 + 16])
@@ -99,43 +99,23 @@ class HttpListen(TCPServer):
             local_stream.close()
             return
 
-        remote = None
-        if dst_family:
-            try:
-                remote = socket.socket(
-                    family=dst_family, type=socket.SOCK_STREAM)
-                # remote.setblocking(False)
-            except OSError:
-                if remote is not None:
-                    remote.close()
-                    remote = None
-        else:
-            host, port = dst_address
-            for res in socket.getaddrinfo(host, port):
-                dst_family, sock_type, proto, _, dst_address = res
-                try:
-                    # socket.SOCK_STREAM: TCP, 目前不支持 UDP
-                    remote = socket.socket(dst_family, sock_type, proto)
-                    # remote = socket.socket(dst_family, socket.SOCK_STREAM, proto)
-                    # remote = socket.socket(dst_family, socket.SOCK_STREAM)
-                    # remote.setblocking(False)
-                    break
-                except OSError:
-                    if remote is not None:
-                        remote.close()
-                        remote = None
-
         if dst_family is None:
+            # 协议错误
             local_stream.close()
             return
 
         # 创建iostream
-        remote_stream = IOStream(remote)
+        remote_stream = None
         try:
-            await remote_stream.connect(dst_address)
+            tcp_client = TCPClient()
+            if dst_family:
+                remote_stream = await tcp_client.connect(dst_address[0], dst_address[1], af=dst_family)
+            else:
+                remote_stream = await tcp_client.connect(dst_address[0], dst_address[1])
         except Exception as e:
             logger.debug('remote connect error')
-            remote_stream.close()
+            if remote_stream:
+                remote_stream.close()
             local_stream.close()
             return None
 
