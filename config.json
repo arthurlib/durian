@@ -1,0 +1,18 @@
+{
+  "key": "EkJSKinK3QzQe_MIMmRbGoI4IrJNg-uUhqLEiOGt-LN1wOJalcO8WGt0VG0On6_7f3kFnCysM0fx7pGbh12hsBm1JD9m3G_mq2GEd_X0zvkQADRZeAftScag71fyx9iqAtbSjxNLFjf3uGipbj4bUdOLpS5EriUdo2cR1b3MciEmt9HP9mp9Xgq5BMIxPew6Rl9WOTV-Y3BgU-kfjsg2J52ZcTAtHJi7pkp2FfqN3w2FGOggQXyxwSOWOxQDkMsJnjzJTrTlxWn_gJq2QyukqFxV49fbL0-Mc4G_KAGXHup6YuDkTGXN5wtQRbqS1L5sihfaQP4P2Ynwk95I_Qan_A==",
+  "server": {
+    "port": 8090
+  },
+
+  "client": {
+    "server_host": "127.0.0.1",
+    "server_port": 8090,
+    "port": 7002
+  },
+
+  "http": {
+    "socks5_host": "127.0.0.1",
+    "socks5_port": 7002,
+    "port": 7003
+  }
+}

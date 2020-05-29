@@ -1,4 +1,4 @@
-from proxy.socks5agent.lib.ciphers.caesar_cipher import CaesarCipher
+from proxy.lib.ciphers.caesar_cipher import CaesarCipher
 
 # global obj
 cipher = None

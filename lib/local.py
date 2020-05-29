@@ -1,31 +1,21 @@
 import struct
-
-from proxy.socks5agent.lib import cipher
-
-SOCKS5_CONN = '1'
-SOCKS5_AUTH = '2'
-SOCKS5_AUTH_REPL = '2_1'
-SOCKS5_CONFIRM = '3'
-SOCKS5_CONFIRM_REPL = '3_1'
-SOCKS5_DONE = '4'
+from proxy.lib import cipher
 
 # cipher = None  # 加密对象
-BUFFER_SIZE = 1024
+from proxy.lib.model import BUFFER_SIZE
 
 
-class LocalSocket(object):
-    def __init__(self, sock, socks5_status=None):
-        self.sock = sock
-        # 标识 socks5 协议进行到哪一步
-        self.socks5_protocol_status = socks5_status  # None: 表示不走协议的socket
+class PorxyStream(object):
+    def __init__(self, stream):
+        self.stream = stream
         # 缓存
         self.buffer = bytes()
 
     def __getattr__(self, item):
-        return getattr(self.sock, item)
+        return getattr(self.stream, item)
 
-    def recv_with_head(self):
-        buf = self.sock.recv(BUFFER_SIZE)
+    async def read_bytes(self, num_bytes=BUFFER_SIZE, partial=True):
+        buf = await self.stream.read_bytes(num_bytes, partial)
         # print('recv' + str(buf))
 
         if not cipher.cipher:
@@ -64,13 +54,14 @@ class LocalSocket(object):
             #         print(len(self.buffer))
             return data
 
-    def sendall_with_head(self, data):
+    async def write(self, data):
         # print('send' + str(data))
         if not cipher.cipher:
-            self.sock.sendall(data)
+            await self.stream.write(data)
         else:
             # if cipher.cipher:
             data = cipher.cipher.encrypt(data)
             length = len(data)
             data = struct.pack(">H", length) + data
-            self.sock.sendall(data)
+            # print('send' + str(data))
+            await self.stream.write(data)

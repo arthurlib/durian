@@ -1,5 +1,11 @@
 # socks5 proxy
 
+依赖
+- python3.7(3.6)
+- tornado
+
+> python3.8 存在问题，tornado暂未兼容py3.8的 asyncio库的一些修改
+
 目前
 * 只支持凯撒加密
 
@@ -18,7 +24,7 @@ python3 lib/ciphers/caesar_cipher.py
 
 2. 配置文件
 
-> 配置文件命名为 config.json ,放在socks5agent目录下
+> 配置文件命名为 config.json ,放在proxy目录下
 
 服务端
 ```json
@@ -66,7 +72,7 @@ http监听(http转socks5)
 * http.socks5_port: socks5代理监听端口
 * http.port: 本地http代理监听端口
 
-http2socks5目录下两个文件：
-* http2socks5_selectors： 默认代码中使用的，使用selectors完成
-* http2socks5_tornado： 使用tornado编写，单独启动使用。（配置信息修改代码）
-
+service 目录下文件说明
+* socks5client : socks5代理客户端，数据加密
+* socks5server : socks5代理服务端，数据加密
+* http2socks5  : http协议转到本地socks5客户端，数据不加密
