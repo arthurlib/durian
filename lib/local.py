@@ -5,7 +5,7 @@ from proxy.lib import cipher
 from proxy.lib.model import BUFFER_SIZE
 
 
-class PorxyStream(object):
+class ProxyStream(object):
     def __init__(self, stream):
         self.stream = stream
         # 缓存

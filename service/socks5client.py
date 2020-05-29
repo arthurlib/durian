@@ -3,7 +3,7 @@ from tornado.iostream import IOStream
 from tornado.tcpclient import TCPClient
 from tornado.tcpserver import TCPServer
 from tornado.gen import multi
-from proxy.lib.local import PorxyStream
+from proxy.lib.local import ProxyStream
 from proxy.lib.log import logger
 from proxy.lib.model import Address
 from proxy.lib.netutil import read_and_send
@@ -17,15 +17,17 @@ class HttpListen(TCPServer):
 
     async def handle_stream(self, stream, address):
         try:
+            remote_stream = None
             try:
                 # 连接远程
                 tcp_client = TCPClient()
                 remote_stream = await tcp_client.connect(self.remote_addr[0], self.remote_addr[1])
-                remote_stream = PorxyStream(remote_stream)
+                remote_stream = ProxyStream(remote_stream)
             except Exception as e:
                 logger.debug('remote connect error')
                 stream.close()
-                remote_stream.close()
+                if remote_stream:
+                    remote_stream.close()
                 return None
 
             # 交换协议

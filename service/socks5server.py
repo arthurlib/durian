@@ -8,7 +8,7 @@ from tornado.tcpserver import TCPServer
 
 from tornado.gen import multi
 
-from proxy.lib.local import PorxyStream
+from proxy.lib.local import ProxyStream
 from proxy.lib.log import logger
 from proxy.lib.model import Address
 from proxy.lib.netutil import read_and_send
@@ -16,7 +16,7 @@ from proxy.lib.netutil import read_and_send
 
 class HttpListen(TCPServer):
     async def handle_stream(self, stream, address):
-        local_stream = PorxyStream(stream)
+        local_stream = ProxyStream(stream)
         try:
             # 交换协议
             remote_stream = await self.exchange_agreement(local_stream)
