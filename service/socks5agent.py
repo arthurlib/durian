@@ -8,7 +8,6 @@ from tornado.tcpserver import TCPServer
 
 from tornado.gen import multi
 
-from proxy.lib.local import ProxyStream
 from proxy.lib.log import logger
 from proxy.lib.model import Address
 from proxy.lib.netutil import read_and_send
@@ -16,7 +15,7 @@ from proxy.lib.netutil import read_and_send
 
 class Listener(TCPServer):
     async def handle_stream(self, stream, address):
-        local_stream = ProxyStream(stream)
+        local_stream = stream
         try:
             # 交换协议
             remote_stream = await self.exchange_agreement(local_stream)
@@ -126,7 +125,7 @@ class Listener(TCPServer):
 def listen(local_port):
     app = Listener()
     app.listen(local_port)
-    print("socks5 proxy server is runing at %s" % local_port)
+    print("socks5 agent server is runing at %s" % local_port)
 
 
 def start():

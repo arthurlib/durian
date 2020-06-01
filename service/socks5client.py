@@ -9,11 +9,11 @@ from proxy.lib.model import Address
 from proxy.lib.netutil import read_and_send
 
 
-class HttpListen(TCPServer):
+class Listener(TCPServer):
     def __init__(self, address, *args, **kwargs):
         self.remote_addr = address
 
-        super(HttpListen, self).__init__(*args, **kwargs)
+        super(Listener, self).__init__(*args, **kwargs)
 
     async def handle_stream(self, stream, address):
         try:
@@ -82,7 +82,7 @@ class HttpListen(TCPServer):
 
 
 def listen(local_port, remote_host, remote_port):
-    app = HttpListen(address=Address(remote_host, remote_port))
+    app = Listener(address=Address(remote_host, remote_port))
     app.listen(local_port)
     print('socks5 proxy client is runing at %s, remote at %s:%s' % (local_port, remote_host, remote_port))
 
