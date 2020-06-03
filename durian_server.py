@@ -1,15 +1,15 @@
-import json
 import os
 import sys
 
+base_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+sys.path.append(os.path.join(base_path, "./"))
+
+import json
 import tornado
 
 from lib.cipher import get_cipher
 from lib.config import server_config_handler
 from service.server import Socks5Agent, TCPForwardServer, TunnerlServer, Socks5Server, Http2Socks5Server
-
-base_path = os.path.dirname(os.path.realpath(sys.argv[0]))
-sys.path.append(os.path.join(base_path, "./"))
 
 
 def main():

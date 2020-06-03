@@ -1,24 +1,29 @@
-import json
 import os
 import sys
 
+base_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+sys.path.append(os.path.join(base_path, "./"))
+
+import json
 from lib.cipher import get_cipher
 from lib.config import client_config__handler
 
-base_path = os.path.dirname(os.path.realpath(sys.argv[0]))
-sys.path.append(os.path.join(base_path, "./"))
 import tornado
 
 from service.client import Socks5Client, TunnelClient
 
+cfgs = {}
 
-async def run():
-    cfgs = {}
+
+def read_config():
     with open(os.path.join(base_path, "config.json"), "r") as f:
         content = f.read()
         cfgs = json.loads(content)
     cfgs = client_config__handler(cfgs)
+    return cfgs
 
+
+async def run():
     cfg = cfgs.get('Socks5Client', None)
     if cfg:
         socks5_client = Socks5Client()
@@ -30,9 +35,13 @@ async def run():
     cfg = cfgs.get('TunnelClient', None)
     if cfg:
         tunnel_client = TunnelClient(cfg['key'])
-        tunnel_client.set_remote_address(cfg['remote_host'],  cfg['remote_port'])
+        tunnel_client.set_remote_address(cfg['remote_host'], cfg['remote_port'])
         await tunnel_client.start()
 
 
 if __name__ == '__main__':
-    tornado.ioloop.IOLoop.current().run_sync(run)
+    read_config()
+    if cfgs.get('TunnelClient', None):
+        tornado.ioloop.IOLoop.current().run_sync(run)
+    else:
+        tornado.ioloop.IOLoop.current().start()
