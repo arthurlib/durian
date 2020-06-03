@@ -6,10 +6,10 @@ import sys
 
 def get_logger():
     # 获取logger实例，如果参数为空则返回root logger
-    logger = logging.getLogger("Proxy")
+    logger = logging.getLogger()
 
     # 指定日志的最低输出级别，默认为WARN级别
-    logger.setLevel(logging.ERROR)
+    logger.setLevel(logging.INFO)
 
     # 指定logger输出格式
     # formatter = logging.Formatter('%(name)s %(asctime)s %(pathname)s; file_name: %(filename)s; %(module)s; %(funcName)s; line:%(lineno)d; %(levelname)-8s: %(message)s')

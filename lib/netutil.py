@@ -1,4 +1,4 @@
-from proxy.lib.model import BUFFER_SIZE
+from lib.base import BUFFER_SIZE
 
 
 async def read_and_send(sock_from, sock_to):

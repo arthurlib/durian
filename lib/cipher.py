@@ -1,12 +1,10 @@
-from proxy.lib.ciphers.caesar_cipher import CaesarCipher
-
-# global obj
-cipher = None
+from lib.ciphers.caesar_cipher import CaesarCipher
 
 
-def set_cipher(cipher_name, key):
-    global cipher
+def get_cipher(cipher_name, key):
     if cipher_name == 'caesar':
         cipher = CaesarCipher(key)
     else:
         raise AttributeError('不存在的加密方式')
+
+    return cipher
